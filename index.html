@@ -42,8 +42,12 @@
       background: #6ea8fe;
       color: white;
       border-radius: 10px;
-      padding: 5px 10px;
+      padding: 6px 12px;
       cursor: pointer;
+    }
+
+    .danger {
+      background: #ff6b6b;
     }
 
     input[type="checkbox"] {
@@ -86,32 +90,22 @@
   <div class="xp-bar">
     <div class="xp-fill" id="xp"></div>
   </div>
+
+  <br>
+  <button class="danger" onclick="resetAll()">重置全部</button>
 </div>
 
 <!-- 任務 -->
 <div class="card">
   <h4>今日任務</h4>
 
-  <div class="task">
-    <label>
-      <input type="checkbox" onchange="toggleTask(this, 't1', 10)">
-      洗衣服（+10）
-    </label>
-  </div>
-
-  <div class="task">
-    <label>
-      <input type="checkbox" onchange="toggleTask(this, 't2', 10)">
-      整理床（+10）
-    </label>
-  </div>
-
-  <div class="task">
-    <label>
-      <input type="checkbox" onchange="toggleTask(this, 't3', 30)">
-      倒垃圾（+30）
-    </label>
-  </div>
+  <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t1',10)"> 洗碗（+10）</label></div>
+  <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t2',10)"> 洗衣服（+10）</label></div>
+  <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t3',10)"> 澆花（+10）</label></div>
+  <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t4',20)"> 大聲唸法文（+20）</label></div>
+  <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t5',20)"> 法文聽寫（+20）</label></div>
+  <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t6',50)"> 打電話給家人（+50）</label></div>
+  <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t7',100)"> 買禮物給家人（+100）</label></div>
 
 </div>
 
@@ -119,30 +113,17 @@
 <div class="card">
   <h4>兌換中心</h4>
 
-  <div class="reward">
-    休息一天（100）
-    <button onclick="redeem(100)">兌換</button>
-  </div>
-
-  <div class="reward">
-    買東西（200）
-    <button onclick="redeem(200)">兌換</button>
-  </div>
-
-  <div class="reward">
-    現金50元（500）
-    <button onclick="redeem(500)">兌換</button>
-  </div>
+  <div class="reward">休息一天（100） <button onclick="redeem(100)">兌換</button></div>
+  <div class="reward">買東西（200） <button onclick="redeem(200)">兌換</button></div>
+  <div class="reward">現金50元（500） <button onclick="redeem(500)">兌換</button></div>
 
 </div>
 
 <script>
-  // ===== 點數 =====
   let points = localStorage.getItem("points")
     ? parseInt(localStorage.getItem("points"))
     : 0;
 
-  // ===== 等級 =====
   function getLevel(p) {
     if (p >= 200) return "王犬 🐺";
     if (p >= 100) return "獵犬 🐕";
@@ -155,7 +136,6 @@
     return 100;
   }
 
-  // ===== 每日重置核心 =====
   function getToday() {
     return new Date().toISOString().split("T")[0];
   }
@@ -165,13 +145,11 @@
     let today = getToday();
 
     if (lastDate !== today) {
-      // 新的一天 → 清空任務
       localStorage.setItem("tasks", JSON.stringify({}));
       localStorage.setItem("lastDate", today);
     }
   }
 
-  // ===== 任務 =====
   function toggleTask(checkbox, id, value) {
     let completed = JSON.parse(localStorage.getItem("tasks") || "{}");
 
@@ -188,7 +166,6 @@
     update();
   }
 
-  // ===== 兌換 =====
   function redeem(cost) {
     if (points >= cost) {
       points -= cost;
@@ -199,7 +176,13 @@
     update();
   }
 
-  // ===== 更新畫面 =====
+  function resetAll() {
+    if (confirm("確定要全部重置嗎？")) {
+      localStorage.clear();
+      location.reload();
+    }
+  }
+
   function update() {
     document.getElementById("points").innerText = points;
     document.getElementById("level").innerText = getLevel(points);
@@ -210,7 +193,6 @@
     localStorage.setItem("points", points);
   }
 
-  // ===== 載入任務 =====
   function loadTasks() {
     let completed = JSON.parse(localStorage.getItem("tasks") || "{}");
 
@@ -222,8 +204,7 @@
     });
   }
 
-  // ===== 初始化 =====
-  checkReset();   // ← 每次開網頁都會檢查是否新的一天
+  checkReset();
   update();
   loadTasks();
 </script>
