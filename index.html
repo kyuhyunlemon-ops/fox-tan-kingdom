@@ -32,9 +32,6 @@
     .task, .reward {
       text-align: left;
       margin: 12px 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
     }
 
     button {
@@ -75,6 +72,18 @@
       background: linear-gradient(90deg, #6ea8fe, #a5c8ff);
       transition: width 0.3s;
     }
+
+    .log {
+      text-align: left;
+      font-size: 13px;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+
+    .log-item {
+      border-bottom: 1px solid #eee;
+      padding: 5px 0;
+    }
   </style>
 </head>
 
@@ -84,7 +93,7 @@
 <p class="subtitle">Glorious Hound Training System</p>
 
 <div class="card">
-  <h3>目前金幣：<span id="points">0</span></h3>
+  <h3>金幣：<span id="points">0</span></h3>
   <div class="level">等級：<span id="level">幼犬</span></div>
 
   <div class="xp-bar">
@@ -99,34 +108,30 @@
 <div class="card">
   <h4>今日任務</h4>
 
-  <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t1',10)"> 洗碗（+10）</label></div>
-  <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t2',10)"> 洗衣服（+10）</label></div>
-  <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t3',10)"> 澆花（+10）</label></div>
-  <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t4',20)"> 大聲唸法文（+20）</label></div>
-  <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t5',20)"> 法文聽寫（+20）</label></div>
-  <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t6',50)"> 打電話給家人（+50）</label></div>
-  <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t7',100)"> 買禮物給家人（+100）</label></div>
+  <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t1',10,'洗碗')"> 洗碗（+10）</label></div>
+  <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t2',10,'洗衣服')"> 洗衣服（+10）</label></div>
+  <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t3',10,'澆花')"> 澆花（+10）</label></div>
+  <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t4',20,'唸法文')"> 大聲唸法文（+20）</label></div>
+  <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t5',20,'法文聽寫')"> 法文聽寫（+20）</label></div>
+  <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t6',50,'打電話給家人')"> 打電話給家人（+50）</label></div>
+  <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t7',100,'買禮物')"> 買禮物給家人（+100）</label></div>
 
 </div>
 
-<!-- 兌換 -->
+<!-- 明細 -->
 <div class="card">
-  <h4>兌換中心</h4>
-
-  <div class="reward">休息一天（100） <button onclick="redeem(100)">兌換</button></div>
-  <div class="reward">買東西（200） <button onclick="redeem(200)">兌換</button></div>
-  <div class="reward">現金50元（500） <button onclick="redeem(500)">兌換</button></div>
-
+  <h4>積分明細</h4>
+  <div class="log" id="log"></div>
 </div>
 
 <script>
-  let points = localStorage.getItem("points")
-    ? parseInt(localStorage.getItem("points"))
-    : 0;
+  let points = parseInt(localStorage.getItem("points") || 0);
+  let logs = JSON.parse(localStorage.getItem("logs") || "[]");
 
   function getLevel(p) {
-    if (p >= 10000) return "王犬 🐺";
-    if (p >= 5000) return "獵犬 🐕";
+    if (p >= 100000) return "王犬 🐺";
+    if (p >= 50000) return "獵犬 🐕";
+    if (p >= 10000) return "成犬 🐕";
     return "幼犬 🐶";
   }
 
@@ -145,68 +150,62 @@
     let today = getToday();
 
     if (lastDate !== today) {
-      localStorage.setItem("tasks", JSON.stringify({}));
+      localStorage.setItem("tasks", "{}");
+      localStorage.setItem("logs", "[]");
       localStorage.setItem("lastDate", today);
+      logs = [];
     }
   }
 
-  function toggleTask(checkbox, id, value) {
-    let completed = JSON.parse(localStorage.getItem("tasks") || "{}");
+  function addLog(text, value) {
+    let time = new Date().toLocaleTimeString();
+    logs.unshift(`${time}｜${text} +${value}`);
+    localStorage.setItem("logs", JSON.stringify(logs));
+  }
 
-    if (checkbox.checked) {
-      if (!completed[id]) {
-        points += value;
-        completed[id] = true;
-      }
-    } else {
-      delete completed[id];
+  function toggleTask(cb, id, value, name) {
+    let tasks = JSON.parse(localStorage.getItem("tasks") || "{}");
+
+    if (cb.checked && !tasks[id]) {
+      points += value;
+      tasks[id] = true;
+      addLog(name, value);
+    } else if (!cb.checked) {
+      delete tasks[id];
     }
 
-    localStorage.setItem("tasks", JSON.stringify(completed));
+    localStorage.setItem("tasks", JSON.stringify(tasks));
     update();
-  }
-
-  function redeem(cost) {
-    if (points >= cost) {
-      points -= cost;
-      alert("兌換成功！");
-    } else {
-      alert("金幣不夠！");
-    }
-    update();
-  }
-
-  function resetAll() {
-    if (confirm("確定要全部重置嗎？")) {
-      localStorage.clear();
-      location.reload();
-    }
   }
 
   function update() {
     document.getElementById("points").innerText = points;
     document.getElementById("level").innerText = getLevel(points);
-
-    let percent = getXPPercent(points);
-    document.getElementById("xp").style.width = percent + "%";
+    document.getElementById("xp").style.width = getXPPercent(points) + "%";
 
     localStorage.setItem("points", points);
+
+    let logHTML = logs.map(l => `<div class="log-item">${l}</div>`).join("");
+    document.getElementById("log").innerHTML = logHTML;
+  }
+
+  function resetAll() {
+    if (confirm("確定重置？")) {
+      localStorage.clear();
+      location.reload();
+    }
   }
 
   function loadTasks() {
-    let completed = JSON.parse(localStorage.getItem("tasks") || "{}");
-
-    document.querySelectorAll("input[type=checkbox]").forEach((cb, index) => {
-      let id = "t" + (index + 1);
-      if (completed[id]) {
-        cb.checked = true;
-      }
+    let tasks = JSON.parse(localStorage.getItem("tasks") || "{}");
+    document.querySelectorAll("input[type=checkbox]").forEach((cb, i) => {
+      if (tasks["t" + (i + 1)]) cb.checked = true;
     });
   }
 
   checkReset();
-  update();
   loadTasks();
+  update();
 </script>
 
 </body>
