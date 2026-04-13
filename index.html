@@ -11,7 +11,6 @@ body {
   text-align:center;
 }
 
-/* 卡片 */
 .card {
   background:white;
   padding:20px;
@@ -24,7 +23,6 @@ body {
 
 .task { text-align:left; margin:8px 0; }
 
-/* 按鈕 */
 button {
   background:#6ea8fe;
   color:white;
@@ -33,7 +31,7 @@ button {
   padding:6px 12px;
 }
 
-/* 小按鈕（右上角用） */
+/* 小按鈕 */
 .small-btn {
   position:absolute;
   right:15px;
@@ -45,16 +43,8 @@ button {
 }
 
 /* XP */
-.xp-bar {
-  height:10px;
-  background:#eee;
-  border-radius:10px;
-  overflow:hidden;
-}
-.xp-fill {
-  height:100%;
-  background:#6ea8fe;
-}
+.xp-bar { height:10px;background:#eee;border-radius:10px;overflow:hidden; }
+.xp-fill { height:100%;background:#6ea8fe; }
 
 /* 日曆 */
 .calendar {
@@ -62,18 +52,13 @@ button {
   grid-template-columns:repeat(7,1fr);
   gap:5px;
 }
-.day {
-  padding:8px;
-  border-radius:8px;
-  background:#eee;
-}
+.day { padding:8px;border-radius:8px;background:#eee; }
+
 .checked {
   background: linear-gradient(135deg,#f5c542,#ffd86b);
   color:#5a4500;
 }
-.today {
-  border:2px solid #f5c542;
-}
+.today { border:2px solid #f5c542; }
 
 /* 兌換 */
 .reward {
@@ -104,7 +89,7 @@ button {
 }
 .crown-animate { animation:glow 0.8s; }
 
-/* 提示 */
+/* toast */
 .toast {
   position:fixed;
   bottom:30px;
@@ -142,7 +127,7 @@ button {
 <div id="crown"></div>
 </div>
 
-<!-- 任務 -->
+<!-- 任務（完全保留） -->
 <div class="card">
 <h4>任務</h4>
 
@@ -309,11 +294,16 @@ function redeem(cost){
   update();
 }
 
-/* log */
+/* ⭐⭐⭐ 唯一修改：24小時制 */
 function addLog(text){
   let now=new Date();
-  let time=now.toLocaleDateString('zh-TW',{month:'2-digit',day:'2-digit'})+" "+
-           now.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
+
+  let time = now.toLocaleDateString('zh-TW',{month:'2-digit',day:'2-digit'})+" "+
+             now.toLocaleTimeString('zh-TW',{
+               hour:'2-digit',
+               minute:'2-digit',
+               hour12:false   // ⭐ 重點
+             });
 
   logs.unshift(time+"｜"+text);
 }
@@ -327,7 +317,6 @@ function resetLogs(){
   }
 }
 
-/* reset */
 function resetTasks(){
   localStorage.setItem("tasks","{}");
   document.querySelectorAll("input").forEach(c=>c.checked=false);
