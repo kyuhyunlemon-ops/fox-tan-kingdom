@@ -27,7 +27,8 @@ button {
   color:white;
   border:none;
   border-radius:8px;
-  padding:5px 10px;
+  padding:6px 12px;
+  cursor:pointer;
 }
 
 .danger { background:#ff6b6b; }
@@ -64,7 +65,7 @@ button {
   color:white;
 }
 
-/* ✨ 浮動提示（比 alert 高級） */
+/* 提示 */
 .toast {
   position: fixed;
   bottom: 30px;
@@ -77,9 +78,7 @@ button {
   opacity: 0;
   transition: 0.3s;
 }
-.toast.show {
-  opacity: 1;
-}
+.toast.show { opacity: 1; }
 </style>
 </head>
 
@@ -99,10 +98,15 @@ button {
   <button class="danger" onclick="resetAll()">重置</button>
 </div>
 
-<!-- 簽到 -->
+<!-- ✨ 簽到 -->
 <div class="card">
 <h4>每日簽到</h4>
+
 <div class="checkin" id="checkin"></div>
+
+<br>
+<button onclick="checkin()">今日簽到</button>
+
 <div id="crown" style="margin-top:10px;"></div>
 </div>
 
@@ -124,7 +128,6 @@ button {
 <div class="card">
 <h4>兌換</h4>
 <div class="reward">休息（100） <button onclick="redeem(100)">兌換</button></div>
-<div class="reward">開心買買（100） <button onclick="redeem(100)">兌換</button></div>
 </div>
 
 <!-- 明細 -->
@@ -133,7 +136,6 @@ button {
 <div id="log" class="log"></div>
 </div>
 
-<!-- ✨ 提示 -->
 <div id="toast" class="toast"></div>
 
 <script>
@@ -156,21 +158,21 @@ function getXP(p){
   return 100;
 }
 
-// ✨ 提示
+// 提示
 function showToast(msg){
   let t = document.getElementById("toast");
   t.innerText = msg;
   t.classList.add("show");
-
   setTimeout(()=> t.classList.remove("show"),1500);
 }
 
-// 簽到
+// 日期
 function getToday(){
   return new Date().toISOString().split("T")[0];
 }
 
-function handleCheckin(){
+// ✨ 手動簽到
+function checkin(){
   let today = getToday();
   let last = localStorage.getItem("lastCheckin");
   let streak = parseInt(localStorage.getItem("streak") || 0);
@@ -179,33 +181,36 @@ function handleCheckin(){
   yesterday.setDate(yesterday.getDate() - 1);
   let yStr = yesterday.toISOString().split("T")[0];
 
-  if (last === today) {
-    // 今天已簽到
-  } 
-  else if (last === yStr) {
-    // 連續
-    streak += 1;
-  } 
-  else {
-    // 中斷
+  if(last === today){
+    showToast("今天已經簽到過了！");
+    return;
+  }
+
+  if(last === yStr){
+    streak++;
+  } else {
     streak = 1;
   }
 
   localStorage.setItem("lastCheckin", today);
   localStorage.setItem("streak", streak);
 
+  showToast("簽到成功！✨");
   renderCheckin(streak);
 }
 
-function renderCheckin(data){
-  let html="";
-  for(let i=0;i<7;i++){
-    html += `<div class="day ${data[i]?'done':''}">${i+1}</div>`;
+// 顯示
+function renderCheckin(streak){
+  let html = "";
+
+  for(let i=1;i<=7;i++){
+    html += `<div class="day ${i<=streak?'done':''}">${i}</div>`;
   }
+
   document.getElementById("checkin").innerHTML = html;
 
   document.getElementById("crown").innerText =
-    data.length===7 ? "👑 連續7天達成！" : "";
+    streak>=7 ? "👑 連續7天達成！" : `目前連續 ${streak} 天`;
 }
 
 // 任務
@@ -229,21 +234,15 @@ function toggleTask(cb,id,val,name){
   update();
 }
 
-// ✨ 兌換（含提示）
+// 兌換
 function redeem(cost){
   if(points>=cost){
-    points -= cost;
-
-    let time=new Date().toLocaleTimeString();
-    logs.unshift(time+"｜兌換 -"+cost);
-
+    points-=cost;
+    logs.unshift("兌換 -"+cost);
     showToast("兌換成功 🎉");
-
   } else {
     showToast("現在還不能換唷～ 🐶");
-    return;
   }
-
   update();
 }
 
@@ -256,6 +255,9 @@ function update(){
 
   document.getElementById("log").innerHTML=
     logs.map(l=>"<div>"+l+"</div>").join("");
+
+  let streak = parseInt(localStorage.getItem("streak")||0);
+  renderCheckin(streak);
 }
 
 function resetAll(){
@@ -265,7 +267,6 @@ function resetAll(){
   }
 }
 
-handleCheckin();
 update();
 </script>
 
