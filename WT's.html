@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>光榮獵犬養成計劃</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f5f7fb;
+      text-align: center;
+    }
+    .card {
+      background: white;
+      padding: 20px;
+      margin: 20px auto;
+      width: 300px;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .task, .reward {
+      text-align: left;
+      margin: 10px 0;
+    }
+    button {
+      float: right;
+      border: none;
+      background: #7ec8e3;
+      color: white;
+      border-radius: 8px;
+      padding: 3px 8px;
+    }
+  </style>
+</head>
+
+<body>
+
+<h2>🐕 光榮獵犬養成計劃</h2>
+
+<div class="card">
+  <h3>目前金幣：<span id="points">0</span></h3>
+</div>
+
+<!-- 任務區 -->
+<div class="card">
+  <h4>今日任務</h4>
+
+  <div class="task">
+    <input type="checkbox" onchange="toggleTask(this, 10)"> 洗衣服（+10）
+  </div>
+
+  <div class="task">
+    <input type="checkbox" onchange="toggleTask(this, 10)"> 整理床（+10）
+  </div>
+
+  <div class="task">
+    <input type="checkbox" onchange="toggleTask(this, 30)"> 倒垃圾（+30）
+  </div>
+
+</div>
+
+<!-- 兌換區 -->
+<div class="card">
+  <h4>兌換中心</h4>
+
+  <div class="reward">
+    休息一天（100）
+    <button onclick="redeem(100)">兌換</button>
+  </div>
+
+  <div class="reward">
+    買東西（200）
+    <button onclick="redeem(200)">兌換</button>
+  </div>
+
+  <div class="reward">
+    現金50元（500）
+    <button onclick="redeem(500)">兌換</button>
+  </div>
+
+</div>
+
+<script>
+  let points = 0;
+
+  function toggleTask(checkbox, value) {
+    if (checkbox.checked) {
+      points += value;
+    } else {
+      points -= value;
+    }
+    update();
+  }
+
+  function redeem(cost) {
+    if (points >= cost) {
+      points -= cost;
+      alert("兌換成功！");
+    } else {
+      alert("金幣不夠！");
+    }
+    update();
+  }
+
+  function update() {
+    document.getElementById("points").innerText = points;
+  }
+</script>
+
+</body>
+</html>
