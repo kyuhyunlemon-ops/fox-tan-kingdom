@@ -15,7 +15,7 @@ body {
   background:white;
   padding:20px;
   margin:20px auto;
-  width:320px;
+  width:340px;
   border-radius:20px;
   box-shadow:0 10px 25px rgba(0,0,0,0.08);
 }
@@ -28,57 +28,43 @@ button {
   border:none;
   border-radius:8px;
   padding:6px 12px;
-  cursor:pointer;
 }
 
 .danger { background:#ff6b6b; }
 
-.xp-bar {
-  height:10px;
-  background:#eee;
-  border-radius:10px;
-  overflow:hidden;
-}
-.xp-fill {
-  height:100%;
-  background:#6ea8fe;
-  transition:0.3s;
-}
+.xp-bar { height:10px;background:#eee;border-radius:10px;overflow:hidden; }
+.xp-fill { height:100%;background:#6ea8fe; }
 
-.log { font-size:12px; text-align:left; max-height:120px; overflow:auto; }
-
-/* 簽到 */
-.checkin {
-  display:flex;
-  justify-content:space-between;
-  margin-top:10px;
+/* 日曆 */
+.calendar {
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:5px;
 }
 .day {
-  width:35px;
-  height:35px;
-  line-height:35px;
-  border-radius:50%;
+  padding:8px;
+  border-radius:8px;
   background:#eee;
 }
-.done {
-  background:#6ea8fe;
-  color:white;
-}
+.today { border:2px solid #6ea8fe; }
+.checked { background:#6ea8fe;color:white; }
+
+.log { font-size:12px;text-align:left;max-height:120px;overflow:auto; }
 
 /* 提示 */
 .toast {
-  position: fixed;
-  bottom: 30px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #333;
-  color: white;
-  padding: 10px 20px;
-  border-radius: 20px;
-  opacity: 0;
-  transition: 0.3s;
+  position:fixed;
+  bottom:30px;
+  left:50%;
+  transform:translateX(-50%);
+  background:#333;
+  color:white;
+  padding:10px 20px;
+  border-radius:20px;
+  opacity:0;
+  transition:0.3s;
 }
-.toast.show { opacity: 1; }
+.toast.show { opacity:1; }
 </style>
 </head>
 
@@ -87,27 +73,24 @@ button {
 <h2>🐶 光榮獵犬養成計劃</h2>
 
 <div class="card">
-  金幣：<span id="points">0</span><br>
-  等級：<span id="level">幼犬</span>
+金幣：<span id="points">0</span><br>
+等級：<span id="level">幼犬</span>
 
-  <div class="xp-bar">
-    <div class="xp-fill" id="xp"></div>
-  </div>
+<div class="xp-bar"><div class="xp-fill" id="xp"></div></div>
 
-  <br>
-  <button class="danger" onclick="resetAll()">重置</button>
+<br>
+<button class="danger" onclick="resetAll()">全部重置</button>
 </div>
 
-<!-- ✨ 簽到 -->
+<!-- 📅 日曆 -->
 <div class="card">
-<h4>每日簽到</h4>
-
-<div class="checkin" id="checkin"></div>
+<h4>簽到日曆</h4>
+<div id="calendar" class="calendar"></div>
 
 <br>
 <button onclick="checkin()">今日簽到</button>
 
-<div id="crown" style="margin-top:10px;"></div>
+<div id="crown"></div>
 </div>
 
 <!-- 任務 -->
@@ -117,17 +100,22 @@ button {
 <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t1',30,'洗碗')"> 洗碗 +30</label></div>
 <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t2',10,'洗衣服')"> 洗衣服 +10</label></div>
 <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t3',10,'澆花')"> 澆花 +10</label></div>
-<div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t4',40,'大聲唸法文')"> 大聲唸法文 +40</label></div>
+<div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t4',40,'唸法文')"> 唸法文 +40</label></div>
 <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t5',40,'法文聽寫')"> 法文聽寫 +40</label></div>
 <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t6',50,'打電話給家人')"> 打電話給家人 +50</label></div>
-<div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t7',100,'買禮物給家人')"> 買禮物給家人 +100</label></div>
+<div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t7',100,'進貢（買禮物給家人）')"> 進貢 +100</label></div>
 
+<br>
+<button onclick="resetTasks()">重置任務勾選</button>
 </div>
 
-<!-- 兌換 -->
+<!-- ✨ 兌換（幫你補回來） -->
 <div class="card">
-<h4>兌換</h4>
+<h4>兌換中心</h4>
+
 <div class="reward">休息（100） <button onclick="redeem(100)">兌換</button></div>
+<div class="reward">開心買買（100） <button onclick="redeem(100)">兌換</button></div>
+
 </div>
 
 <!-- 明細 -->
@@ -142,124 +130,136 @@ button {
 let points = parseInt(localStorage.getItem("points")||0);
 let logs = JSON.parse(localStorage.getItem("logs")||"[]");
 
-// 等級
+/* 等級 */
 function getLevel(p){
-  if (p >= 100000) return "王犬 🐺";
-  if (p >= 50000) return "獵犬 🐕";
-  if (p >= 10000) return "成犬 🐕";
+  if(p>=100000) return "王犬 🐺";
+  if(p>=50000) return "獵犬 🐕";
+  if(p>=10000) return "成犬 🐕";
   return "幼犬 🐶";
 }
 
-// XP
+/* XP */
 function getXP(p){
-  if(p < 10000) return (p / 10000) * 100;
-  if(p < 50000) return ((p - 10000) / 40000) * 100;
-  if(p < 100000) return ((p - 50000) / 50000) * 100;
+  if(p<10000) return (p/10000)*100;
+  if(p<50000) return ((p-10000)/40000)*100;
+  if(p<100000) return ((p-50000)/50000)*100;
   return 100;
 }
 
-// 提示
+/* toast */
 function showToast(msg){
-  let t = document.getElementById("toast");
-  t.innerText = msg;
+  let t=document.getElementById("toast");
+  t.innerText=msg;
   t.classList.add("show");
-  setTimeout(()=> t.classList.remove("show"),1500);
+  setTimeout(()=>t.classList.remove("show"),1500);
 }
 
-// 日期
+/* 日期 */
 function getToday(){
   return new Date().toISOString().split("T")[0];
 }
 
-// ✨ 手動簽到
+/* 日曆 */
+function renderCalendar(){
+  let data = JSON.parse(localStorage.getItem("checkinDays")||"[]");
+  let now = new Date();
+  let y=now.getFullYear(), m=now.getMonth();
+  let last=new Date(y,m+1,0).getDate();
+  let today=now.getDate();
+
+  let html="";
+  for(let i=1;i<=last;i++){
+    let d=`${y}-${m+1}-${i}`;
+    let cls="day";
+    if(i===today) cls+=" today";
+    if(data.includes(d)) cls+=" checked";
+    html+=`<div class="${cls}">${i}</div>`;
+  }
+  document.getElementById("calendar").innerHTML=html;
+}
+
+/* 簽到 */
 function checkin(){
-  let today = getToday();
-  let last = localStorage.getItem("lastCheckin");
-  let streak = parseInt(localStorage.getItem("streak") || 0);
+  let today=getToday();
+  let data=JSON.parse(localStorage.getItem("checkinDays")||"[]");
 
-  let yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  let yStr = yesterday.toISOString().split("T")[0];
-
-  if(last === today){
-    showToast("今天已經簽到過了！");
+  if(data.includes(today)){
+    showToast("今天簽過了！");
     return;
   }
 
-  if(last === yStr){
-    streak++;
-  } else {
-    streak = 1;
-  }
+  data.push(today);
+  localStorage.setItem("checkinDays",JSON.stringify(data));
 
-  localStorage.setItem("lastCheckin", today);
-  localStorage.setItem("streak", streak);
-
-  showToast("簽到成功！✨");
-  renderCheckin(streak);
+  updateStreak();
+  renderCalendar();
+  showToast("簽到成功✨");
 }
 
-// 顯示
-function renderCheckin(streak){
-  let html = "";
+/* 連續 */
+function updateStreak(){
+  let data=JSON.parse(localStorage.getItem("checkinDays")||"[]").sort();
+  let streak=1;
 
-  for(let i=1;i<=7;i++){
-    html += `<div class="day ${i<=streak?'done':''}">${i}</div>`;
+  for(let i=data.length-1;i>0;i--){
+    let d1=new Date(data[i]), d2=new Date(data[i-1]);
+    if((d1-d2)/(1000*60*60*24)===1) streak++;
+    else break;
   }
-
-  document.getElementById("checkin").innerHTML = html;
 
   document.getElementById("crown").innerText =
     streak>=7 ? "👑 連續7天達成！" : `目前連續 ${streak} 天`;
 }
 
-// 任務
+/* 任務 */
 function toggleTask(cb,id,val,name){
-  let tasks = JSON.parse(localStorage.getItem("tasks")||"{}");
+  let tasks=JSON.parse(localStorage.getItem("tasks")||"{}");
 
   if(cb.checked && !tasks[id]){
     points+=val;
     tasks[id]=true;
-
-    let time=new Date().toLocaleTimeString();
-    logs.unshift(time+"｜"+name+" +"+val);
+    logs.unshift(name+" +"+val);
   }
 
-  if(!cb.checked){
-    delete tasks[id];
-  }
+  if(!cb.checked) delete tasks[id];
 
   localStorage.setItem("tasks",JSON.stringify(tasks));
-  localStorage.setItem("logs",JSON.stringify(logs));
   update();
 }
 
-// 兌換
+/* 任務重置 */
+function resetTasks(){
+  localStorage.setItem("tasks","{}");
+  document.querySelectorAll("input").forEach(c=>c.checked=false);
+  showToast("任務已重置");
+}
+
+/* ✨ 兌換 */
 function redeem(cost){
   if(points>=cost){
     points-=cost;
     logs.unshift("兌換 -"+cost);
-    showToast("兌換成功 🎉");
-  } else {
+    showToast("兌換成功🎉");
+  }else{
     showToast("現在還不能換唷～ 🐶");
   }
   update();
 }
 
+/* 更新 */
 function update(){
   document.getElementById("points").innerText=points;
   document.getElementById("level").innerText=getLevel(points);
   document.getElementById("xp").style.width=getXP(points)+"%";
 
   localStorage.setItem("points",points);
+  localStorage.setItem("logs",JSON.stringify(logs));
 
   document.getElementById("log").innerHTML=
     logs.map(l=>"<div>"+l+"</div>").join("");
-
-  let streak = parseInt(localStorage.getItem("streak")||0);
-  renderCheckin(streak);
 }
 
+/* 重置 */
 function resetAll(){
   if(confirm("確定重置？")){
     localStorage.clear();
@@ -267,6 +267,8 @@ function resetAll(){
   }
 }
 
+renderCalendar();
+updateStreak();
 update();
 </script>
 
