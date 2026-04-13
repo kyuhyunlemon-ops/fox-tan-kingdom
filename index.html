@@ -1,211 +1,170 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <title>光榮獵犬養成計劃</title>
+<meta charset="UTF-8">
+<title>光榮獵犬養成計劃</title>
 
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont;
-      background: linear-gradient(135deg, #eaf2ff, #f8fbff);
-      text-align: center;
-      margin: 0;
-    }
+<style>
+body {
+  font-family: -apple-system;
+  background: linear-gradient(135deg,#eaf2ff,#f8fbff);
+  text-align:center;
+}
 
-    h2 { margin-top: 30px; }
+.card {
+  background:white;
+  padding:20px;
+  margin:20px auto;
+  width:320px;
+  border-radius:20px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.08);
+}
 
-    .subtitle {
-      color: gray;
-      margin-top: -10px;
-      font-size: 14px;
-    }
+.task,.reward { text-align:left; margin:10px 0; }
 
-    .card {
-      background: white;
-      padding: 20px;
-      margin: 20px auto;
-      width: 320px;
-      border-radius: 20px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-    }
+button {
+  background:#6ea8fe;
+  color:white;
+  border:none;
+  border-radius:8px;
+  padding:5px 10px;
+}
 
-    .task, .reward {
-      text-align: left;
-      margin: 12px 0;
-    }
+.danger { background:#ff6b6b; }
 
-    button {
-      border: none;
-      background: #6ea8fe;
-      color: white;
-      border-radius: 10px;
-      padding: 6px 12px;
-      cursor: pointer;
-    }
+.xp-bar {
+  height:10px;
+  background:#eee;
+  border-radius:10px;
+  overflow:hidden;
+}
+.xp-fill {
+  height:100%;
+  background:#6ea8fe;
+  transition:0.3s;
+}
 
-    .danger {
-      background: #ff6b6b;
-    }
-
-    input[type="checkbox"] {
-      transform: scale(1.2);
-      margin-right: 8px;
-    }
-
-    .level {
-      font-weight: bold;
-      margin-top: 10px;
-    }
-
-    .xp-bar {
-      width: 100%;
-      height: 10px;
-      background: #eee;
-      border-radius: 10px;
-      margin-top: 10px;
-      overflow: hidden;
-    }
-
-    .xp-fill {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #6ea8fe, #a5c8ff);
-      transition: width 0.3s;
-    }
-
-    .log {
-      text-align: left;
-      font-size: 13px;
-      max-height: 150px;
-      overflow-y: auto;
-    }
-
-    .log-item {
-      border-bottom: 1px solid #eee;
-      padding: 5px 0;
-    }
-  </style>
+.log { font-size:12px; text-align:left; max-height:120px; overflow:auto; }
+</style>
 </head>
 
 <body>
 
 <h2>🐶 光榮獵犬養成計劃</h2>
-<p class="subtitle">Glorious Hound Training System</p>
 
 <div class="card">
-  <h3>金幣：<span id="points">0</span></h3>
-  <div class="level">等級：<span id="level">幼犬</span></div>
+  金幣：<span id="points">0</span><br>
+  等級：<span id="level">幼犬</span>
 
   <div class="xp-bar">
     <div class="xp-fill" id="xp"></div>
   </div>
 
   <br>
-  <button class="danger" onclick="resetAll()">重置全部</button>
+  <button class="danger" onclick="resetAll()">重置</button>
 </div>
 
 <!-- 任務 -->
 <div class="card">
-  <h4>今日任務</h4>
+<h4>任務</h4>
 
-  <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t1',10,'洗碗')"> 洗碗（+10）</label></div>
-  <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t2',10,'洗衣服')"> 洗衣服（+10）</label></div>
-  <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t3',10,'澆花')"> 澆花（+10）</label></div>
-  <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t4',20,'唸法文')"> 大聲唸法文（+20）</label></div>
-  <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t5',20,'法文聽寫')"> 法文聽寫（+20）</label></div>
-  <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t6',50,'打電話給家人')"> 打電話給家人（+50）</label></div>
-  <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t7',100,'買禮物')"> 買禮物給家人（+100）</label></div>
+<div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t1',10,'洗碗')"> 洗碗 +10</label></div>
+<div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t2',10,'洗衣服')"> 洗衣服 +10</label></div>
+<div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t3',10,'澆花')"> 澆花 +10</label></div>
+<div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t4',20,'唸法文')"> 大聲唸法文 +20</label></div>
+<div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t5',20,'法文聽寫')"> 法文聽寫 +20</label></div>
+<div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t6',50,'打電話給家人')"> 打電話給家人 +50</label></div>
+<div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t7',100,'買禮物')"> 買禮物給家人 +100</label></div>
+
+</div>
+
+<!-- 兌換 -->
+<div class="card">
+<h4>兌換中心</h4>
+
+<div class="reward">休息一天（100） <button onclick="redeem(100)">兌換</button></div>
+<div class="reward">買東西（200） <button onclick="redeem(200)">兌換</button></div>
+<div class="reward">現金50元（500） <button onclick="redeem(500)">兌換</button></div>
 
 </div>
 
 <!-- 明細 -->
 <div class="card">
-  <h4>積分明細</h4>
-  <div class="log" id="log"></div>
+<h4>積分明細</h4>
+<div id="log" class="log"></div>
 </div>
 
 <script>
-  let points = parseInt(localStorage.getItem("points") || 0);
-  let logs = JSON.parse(localStorage.getItem("logs") || "[]");
+let points = parseInt(localStorage.getItem("points")||0);
+let logs = JSON.parse(localStorage.getItem("logs")||"[]");
 
-  function getLevel(p) {
-    if (p >= 100000) return "王犬 🐺";
-    if (p >= 50000) return "獵犬 🐕";
-    if (p >= 10000) return "成犬 🐕";
-    return "幼犬 🐶";
+// ✨ 新等級
+function getLevel(p){
+  if (p >= 100000) return "王犬 🐺";
+  if (p >= 50000) return "獵犬 🐕";
+  if (p >= 10000) return "成犬 🐕";
+  return "幼犬 🐶";
+}
+
+// ✨ XP條（每個階段10000）
+function getXP(p){
+  if(p < 10000) return (p / 10000) * 100;
+  if(p < 50000) return ((p - 10000) / 40000) * 100;
+  if(p < 100000) return ((p - 50000) / 50000) * 100;
+  return 100;
+}
+
+function toggleTask(cb,id,val,name){
+  let tasks = JSON.parse(localStorage.getItem("tasks")||"{}");
+
+  if(cb.checked && !tasks[id]){
+    points+=val;
+    tasks[id]=true;
+
+    let time=new Date().toLocaleTimeString();
+    logs.unshift(time+"｜"+name+" +"+val);
   }
 
-  function getXPPercent(p) {
-    if (p < 100) return (p / 100) * 100;
-    if (p < 200) return ((p - 100) / 100) * 100;
-    return 100;
+  if(!cb.checked){
+    delete tasks[id];
   }
 
-  function getToday() {
-    return new Date().toISOString().split("T")[0];
-  }
-
-  function checkReset() {
-    let lastDate = localStorage.getItem("lastDate");
-    let today = getToday();
-
-    if (lastDate !== today) {
-      localStorage.setItem("tasks", "{}");
-      localStorage.setItem("logs", "[]");
-      localStorage.setItem("lastDate", today);
-      logs = [];
-    }
-  }
-
-  function addLog(text, value) {
-    let time = new Date().toLocaleTimeString();
-    logs.unshift(`${time}｜${text} +${value}`);
-    localStorage.setItem("logs", JSON.stringify(logs));
-  }
-
-  function toggleTask(cb, id, value, name) {
-    let tasks = JSON.parse(localStorage.getItem("tasks") || "{}");
-
-    if (cb.checked && !tasks[id]) {
-      points += value;
-      tasks[id] = true;
-      addLog(name, value);
-    } else if (!cb.checked) {
-      delete tasks[id];
-    }
-
-    localStorage.setItem("tasks", JSON.stringify(tasks));
-    update();
-  }
-
-  function update() {
-    document.getElementById("points").innerText = points;
-    document.getElementById("level").innerText = getLevel(points);
-    document.getElementById("xp").style.width = getXPPercent(points) + "%";
-
-    localStorage.setItem("points", points);
-
-    let logHTML = logs.map(l => `<div class="log-item">${l}</div>`).join("");
-    document.getElementById("log").innerHTML = logHTML;
-  }
-
-  function resetAll() {
-    if (confirm("確定重置？")) {
-      localStorage.clear();
-      location.reload();
-    }
-  }
-
-  function loadTasks() {
-    let tasks = JSON.parse(localStorage.getItem("tasks") || "{}");
-    document.querySelectorAll("input[type=checkbox]").forEach((cb, i) => {
-      if (tasks["t" + (i + 1)]) cb.checked = true;
-    });
-  }
-
-  checkReset();
-  loadTasks();
+  localStorage.setItem("tasks",JSON.stringify(tasks));
+  localStorage.setItem("logs",JSON.stringify(logs));
   update();
+}
+
+function redeem(cost){
+  if(points>=cost){
+    points-=cost;
+
+    let time=new Date().toLocaleTimeString();
+    logs.unshift(time+"｜兌換 -"+cost);
+  }else{
+    alert("不夠！");
+  }
+  update();
+}
+
+function update(){
+  document.getElementById("points").innerText=points;
+  document.getElementById("level").innerText=getLevel(points);
+  document.getElementById("xp").style.width=getXP(points)+"%";
+
+  localStorage.setItem("points",points);
+
+  document.getElementById("log").innerHTML=
+    logs.map(l=>"<div>"+l+"</div>").join("");
+}
+
+function resetAll(){
+  if(confirm("確定重置？")){
+    localStorage.clear();
+    location.reload();
+  }
+}
+
+update();
 </script>
 
 </body>
