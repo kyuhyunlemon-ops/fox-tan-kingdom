@@ -63,6 +63,23 @@ button {
   background:#6ea8fe;
   color:white;
 }
+
+/* ✨ 浮動提示（比 alert 高級） */
+.toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 20px;
+  opacity: 0;
+  transition: 0.3s;
+}
+.toast.show {
+  opacity: 1;
+}
 </style>
 </head>
 
@@ -82,24 +99,22 @@ button {
   <button class="danger" onclick="resetAll()">重置</button>
 </div>
 
-<!-- ✨ 簽到 -->
+<!-- 簽到 -->
 <div class="card">
 <h4>每日簽到</h4>
-
 <div class="checkin" id="checkin"></div>
-
-<div id="crown" style="margin-top:10px;font-size:18px;"></div>
+<div id="crown" style="margin-top:10px;"></div>
 </div>
 
 <!-- 任務 -->
 <div class="card">
 <h4>任務</h4>
 
-<div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t1',10,'洗碗')"> 洗碗 +30</label></div>
+<div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t1',30,'洗碗')"> 洗碗 +30</label></div>
 <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t2',10,'洗衣服')"> 洗衣服 +10</label></div>
 <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t3',10,'澆花')"> 澆花 +10</label></div>
-<div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t4',20,'大聲唸法文')"> 大聲唸法文 +40</label></div>
-<div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t5',20,'聽寫')"> 法文聽寫 +40</label></div>
+<div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t4',40,'大聲唸法文')"> 大聲唸法文 +40</label></div>
+<div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t5',40,'法文聽寫')"> 法文聽寫 +40</label></div>
 <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t6',50,'打電話給家人')"> 打電話給家人 +50</label></div>
 <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t7',100,'買禮物給家人')"> 買禮物給家人 +100</label></div>
 
@@ -117,6 +132,9 @@ button {
 <h4>積分明細</h4>
 <div id="log" class="log"></div>
 </div>
+
+<!-- ✨ 提示 -->
+<div id="toast" class="toast"></div>
 
 <script>
 let points = parseInt(localStorage.getItem("points")||0);
@@ -138,7 +156,16 @@ function getXP(p){
   return 100;
 }
 
-// ===== 簽到 =====
+// ✨ 提示
+function showToast(msg){
+  let t = document.getElementById("toast");
+  t.innerText = msg;
+  t.classList.add("show");
+
+  setTimeout(()=> t.classList.remove("show"),1500);
+}
+
+// 簽到
 function getToday(){
   return new Date().toISOString().split("T")[0];
 }
@@ -151,26 +178,20 @@ function handleCheckin(){
     data.push(today);
   }
 
-  // 只保留7天
   data = data.slice(-7);
   localStorage.setItem("checkin",JSON.stringify(data));
-
   renderCheckin(data);
 }
 
 function renderCheckin(data){
   let html="";
   for(let i=0;i<7;i++){
-    let done = data[i] ? "done" : "";
-    html += `<div class="day ${done}">${i+1}</div>`;
+    html += `<div class="day ${data[i]?'done':''}">${i+1}</div>`;
   }
   document.getElementById("checkin").innerHTML = html;
 
-  if(data.length === 7){
-    document.getElementById("crown").innerText="👑 連續7天達成！";
-  } else {
-    document.getElementById("crown").innerText="";
-  }
+  document.getElementById("crown").innerText =
+    data.length===7 ? "👑 連續7天達成！" : "";
 }
 
 // 任務
@@ -194,12 +215,21 @@ function toggleTask(cb,id,val,name){
   update();
 }
 
-// 兌換
+// ✨ 兌換（含提示）
 function redeem(cost){
   if(points>=cost){
-    points-=cost;
-    logs.unshift("兌換 -"+cost);
+    points -= cost;
+
+    let time=new Date().toLocaleTimeString();
+    logs.unshift(time+"｜兌換 -"+cost);
+
+    showToast("兌換成功 🎉");
+
+  } else {
+    showToast("現在還不能換唷～ 🐶");
+    return;
   }
+
   update();
 }
 
