@@ -3,62 +3,95 @@
 <head>
   <meta charset="UTF-8">
   <title>光榮獵犬養成計劃</title>
+
   <style>
     body {
-      font-family: sans-serif;
-      background: #f5f7fb;
+      font-family: -apple-system, BlinkMacSystemFont;
+      background: linear-gradient(135deg, #eaf2ff, #f8fbff);
       text-align: center;
+      margin: 0;
     }
+
+    h2 {
+      margin-top: 30px;
+    }
+
+    .subtitle {
+      color: gray;
+      margin-top: -10px;
+      font-size: 14px;
+    }
+
     .card {
       background: white;
       padding: 20px;
       margin: 20px auto;
-      width: 300px;
-      border-radius: 15px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      width: 320px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
     }
+
     .task, .reward {
       text-align: left;
-      margin: 10px 0;
+      margin: 12px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
+
     button {
-      float: right;
       border: none;
-      background: #7ec8e3;
+      background: #6ea8fe;
       color: white;
-      border-radius: 8px;
-      padding: 3px 8px;
+      border-radius: 10px;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+
+    input[type="checkbox"] {
+      transform: scale(1.2);
+      margin-right: 8px;
     }
   </style>
 </head>
 
 <body>
 
-<h2>🐕 光榮獵犬養成計劃</h2>
+<h2>🐶 光榮獵犬養成計劃</h2>
+<p class="subtitle">Glorious Hound Training System</p>
 
 <div class="card">
   <h3>目前金幣：<span id="points">0</span></h3>
 </div>
 
-<!-- 任務區 -->
+<!-- 任務 -->
 <div class="card">
   <h4>今日任務</h4>
 
   <div class="task">
-    <input type="checkbox" onchange="toggleTask(this, 10)"> 洗衣服（+10）
+    <label>
+      <input type="checkbox" onchange="toggleTask(this, 't1', 10)">
+      洗衣服（+10）
+    </label>
   </div>
 
   <div class="task">
-    <input type="checkbox" onchange="toggleTask(this, 10)"> 整理床（+10）
+    <label>
+      <input type="checkbox" onchange="toggleTask(this, 't2', 10)">
+      整理床（+10）
+    </label>
   </div>
 
   <div class="task">
-    <input type="checkbox" onchange="toggleTask(this, 30)"> 倒垃圾（+30）
+    <label>
+      <input type="checkbox" onchange="toggleTask(this, 't3', 30)">
+      倒垃圾（+30）
+    </label>
   </div>
 
 </div>
 
-<!-- 兌換區 -->
+<!-- 兌換 -->
 <div class="card">
   <h4>兌換中心</h4>
 
@@ -80,14 +113,22 @@
 </div>
 
 <script>
-  let points = 0;
+  let points = localStorage.getItem("points")
+    ? parseInt(localStorage.getItem("points"))
+    : 0;
 
-  function toggleTask(checkbox, value) {
+  function toggleTask(checkbox, id, value) {
+    let completed = JSON.parse(localStorage.getItem("tasks") || "{}");
+
     if (checkbox.checked) {
       points += value;
+      completed[id] = true;
     } else {
       points -= value;
+      delete completed[id];
     }
+
+    localStorage.setItem("tasks", JSON.stringify(completed));
     update();
   }
 
@@ -103,7 +144,22 @@
 
   function update() {
     document.getElementById("points").innerText = points;
+    localStorage.setItem("points", points);
   }
+
+  function loadTasks() {
+    let completed = JSON.parse(localStorage.getItem("tasks") || "{}");
+
+    document.querySelectorAll("input[type=checkbox]").forEach((cb, index) => {
+      let id = "t" + (index + 1);
+      if (completed[id]) {
+        cb.checked = true;
+      }
+    });
+  }
+
+  update();
+  loadTasks();
 </script>
 
 </body>
