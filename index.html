@@ -171,16 +171,30 @@ function getToday(){
 }
 
 function handleCheckin(){
-  let data = JSON.parse(localStorage.getItem("checkin")||"[]");
   let today = getToday();
+  let last = localStorage.getItem("lastCheckin");
+  let streak = parseInt(localStorage.getItem("streak") || 0);
 
-  if(!data.includes(today)){
-    data.push(today);
+  let yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  let yStr = yesterday.toISOString().split("T")[0];
+
+  if (last === today) {
+    // 今天已簽到
+  } 
+  else if (last === yStr) {
+    // 連續
+    streak += 1;
+  } 
+  else {
+    // 中斷
+    streak = 1;
   }
 
-  data = data.slice(-7);
-  localStorage.setItem("checkin",JSON.stringify(data));
-  renderCheckin(data);
+  localStorage.setItem("lastCheckin", today);
+  localStorage.setItem("streak", streak);
+
+  renderCheckin(streak);
 }
 
 function renderCheckin(data){
