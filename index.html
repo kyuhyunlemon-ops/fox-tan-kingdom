@@ -32,10 +32,11 @@ button {
 
 .danger { background:#ff6b6b; }
 
+/* XP */
 .xp-bar { height:10px;background:#eee;border-radius:10px;overflow:hidden; }
 .xp-fill { height:100%;background:#6ea8fe; }
 
-/* 日曆 */
+/* 📅 日曆 */
 .calendar {
   display:grid;
   grid-template-columns:repeat(7,1fr);
@@ -46,10 +47,34 @@ button {
   border-radius:8px;
   background:#eee;
 }
-.today { border:2px solid #6ea8fe; }
-.checked { background:#6ea8fe;color:white; }
 
-.log { font-size:12px;text-align:left;max-height:120px;overflow:auto; }
+/* 👑 金色簽到 */
+.checked {
+  background: linear-gradient(135deg,#f5c542,#ffd86b);
+  color:#5a4500;
+  font-weight:600;
+  box-shadow:0 4px 10px rgba(245,197,66,0.4);
+}
+
+.today {
+  border:2px solid #f5c542;
+}
+
+/* log */
+.log {
+  font-size:13px;
+  text-align:left;
+  max-height:150px;
+  overflow:auto;
+  line-height:1.6;
+}
+.log div {
+  padding:6px 8px;
+  border-bottom:1px solid #eee;
+}
+.plus { color:#2e7d32; }
+.minus { color:#c62828; }
+.time { color:#888; font-size:11px; }
 
 /* 提示 */
 .toast {
@@ -97,11 +122,11 @@ button {
 <div class="card">
 <h4>任務</h4>
 
-<div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t1',30,'洗碗')"> 洗碗 +30</label></div>
+<div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t1',30,'洗碗')"> 洗碗 +20</label></div>
 <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t2',10,'洗衣服')"> 洗衣服 +10</label></div>
 <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t3',10,'澆花')"> 澆花 +10</label></div>
 <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t4',40,'唸法文')"> 唸法文 +40</label></div>
-<div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t5',40,'法文聽寫')"> 法文聽寫 +40</label></div>
+<div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t5',40,'聽寫')"> 聽寫 +40</label></div>
 <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t6',50,'打電話給家人')"> 打電話給家人 +50</label></div>
 <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t7',100,'進貢（買禮物給家人）')"> 進貢 +100</label></div>
 
@@ -109,7 +134,7 @@ button {
 <button onclick="resetTasks()">重置任務勾選</button>
 </div>
 
-<!-- ✨ 兌換（幫你補回來） -->
+<!-- 🎁 兌換 -->
 <div class="card">
 <h4>兌換中心</h4>
 
@@ -118,7 +143,7 @@ button {
 
 </div>
 
-<!-- 明細 -->
+<!-- 📊 明細 -->
 <div class="card">
 <h4>積分明細</h4>
 <div id="log" class="log"></div>
@@ -146,7 +171,7 @@ function getXP(p){
   return 100;
 }
 
-/* toast */
+/* 提示 */
 function showToast(msg){
   let t=document.getElementById("toast");
   t.innerText=msg;
@@ -159,7 +184,7 @@ function getToday(){
   return new Date().toISOString().split("T")[0];
 }
 
-/* 日曆 */
+/* 📅 日曆 */
 function renderCalendar(){
   let data = JSON.parse(localStorage.getItem("checkinDays")||"[]");
   let now = new Date();
@@ -169,10 +194,16 @@ function renderCalendar(){
 
   let html="";
   for(let i=1;i<=last;i++){
-    let d=`${y}-${m+1}-${i}`;
+
+    let mm = String(m+1).padStart(2,'0');
+    let dd = String(i).padStart(2,'0');
+    let d = `${y}-${mm}-${dd}`;
+
     let cls="day";
+
     if(i===today) cls+=" today";
     if(data.includes(d)) cls+=" checked";
+
     html+=`<div class="${cls}">${i}</div>`;
   }
   document.getElementById("calendar").innerHTML=html;
@@ -196,7 +227,7 @@ function checkin(){
   showToast("簽到成功✨");
 }
 
-/* 連續 */
+/* 🔥 連續 */
 function updateStreak(){
   let data=JSON.parse(localStorage.getItem("checkinDays")||"[]").sort();
   let streak=1;
@@ -218,7 +249,13 @@ function toggleTask(cb,id,val,name){
   if(cb.checked && !tasks[id]){
     points+=val;
     tasks[id]=true;
-    logs.unshift(name+" +"+val);
+
+    let now=new Date();
+    let time = now.toLocaleDateString('zh-TW',{month:'2-digit',day:'2-digit'}) 
+             + " " +
+             now.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',hour12:false});
+
+    logs.unshift(time+"｜"+name+" +"+val);
   }
 
   if(!cb.checked) delete tasks[id];
@@ -234,11 +271,17 @@ function resetTasks(){
   showToast("任務已重置");
 }
 
-/* ✨ 兌換 */
+/* 🎁 兌換 */
 function redeem(cost){
   if(points>=cost){
     points-=cost;
-    logs.unshift("兌換 -"+cost);
+
+    let now=new Date();
+    let time = now.toLocaleDateString('zh-TW',{month:'2-digit',day:'2-digit'}) 
+             + " " +
+             now.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',hour12:false});
+
+    logs.unshift(time+"｜兌換 -"+cost);
     showToast("兌換成功🎉");
   }else{
     showToast("現在還不能換唷～ 🐶");
@@ -255,8 +298,17 @@ function update(){
   localStorage.setItem("points",points);
   localStorage.setItem("logs",JSON.stringify(logs));
 
-  document.getElementById("log").innerHTML=
-    logs.map(l=>"<div>"+l+"</div>").join("");
+  document.getElementById("log").innerHTML =
+  logs.map(l=>{
+    let isMinus=l.includes("兌換");
+    let cls=isMinus?"minus":"plus";
+    let parts=l.split("｜");
+
+    return `<div>
+      <span class="time">${parts[0]}</span><br>
+      <span class="${cls}">${parts[1]}</span>
+    </div>`;
+  }).join("");
 }
 
 /* 重置 */
