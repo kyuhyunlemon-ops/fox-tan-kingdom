@@ -34,49 +34,41 @@ button {
 
 /* XP */
 .xp-bar { height:10px;background:#eee;border-radius:10px;overflow:hidden; }
-.xp-fill { height:100%;background:#6ea8fe; }
+.xp-fill { height:100%;background:#6ea8fe; transition:0.5s; }
 
-/* 📅 日曆 */
+/* 日曆 */
 .calendar {
   display:grid;
   grid-template-columns:repeat(7,1fr);
   gap:5px;
 }
-.day {
-  padding:8px;
-  border-radius:8px;
-  background:#eee;
-}
+.day { padding:8px;border-radius:8px;background:#eee; }
 
-/* 👑 金色簽到 */
 .checked {
   background: linear-gradient(135deg,#f5c542,#ffd86b);
   color:#5a4500;
-  font-weight:600;
   box-shadow:0 4px 10px rgba(245,197,66,0.4);
 }
-
-.today {
-  border:2px solid #f5c542;
-}
+.today { border:2px solid #f5c542; }
 
 /* log */
-.log {
-  font-size:13px;
-  text-align:left;
-  max-height:150px;
-  overflow:auto;
-  line-height:1.6;
-}
-.log div {
-  padding:6px 8px;
-  border-bottom:1px solid #eee;
-}
-.plus { color:#2e7d32; }
-.minus { color:#c62828; }
-.time { color:#888; font-size:11px; }
+.log div { padding:6px;border-bottom:1px solid #eee; }
+.plus { color:green; }
+.minus { color:red; }
+.time { color:#888;font-size:11px; }
 
-/* 提示 */
+/* crown */
+@keyframes glow {
+  0%{transform:scale(1);}
+  50%{transform:scale(1.3);text-shadow:0 0 20px gold;}
+  100%{transform:scale(1);}
+}
+.crown-animate { animation:glow 0.8s; }
+
+/* 成就 */
+.achieved { color:gold;font-weight:bold; }
+
+/* toast */
 .toast {
   position:fixed;
   bottom:30px;
@@ -100,53 +92,55 @@ button {
 <div class="card">
 金幣：<span id="points">0</span><br>
 等級：<span id="level">幼犬</span>
-
-<div class="xp-bar"><div class="xp-fill" id="xp"></div></div>
-
-<br>
-<button class="danger" onclick="resetAll()">全部重置</button>
+<div class="xp-bar"><div id="xp" class="xp-fill"></div></div>
 </div>
 
-<!-- 📅 日曆 -->
+<!-- 日曆 -->
 <div class="card">
-<h4>簽到日曆</h4>
+<h4>簽到</h4>
 <div id="calendar" class="calendar"></div>
-
 <br>
-<button onclick="checkin()">今日簽到</button>
-
+<button onclick="checkin()">簽到</button>
 <div id="crown"></div>
 </div>
 
 <!-- 任務 -->
 <div class="card">
 <h4>任務</h4>
+<div class="card">
+<h4>任務</h4>
 
-<div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t1',30,'洗碗')"> 洗碗 +20</label></div>
-<div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t2',10,'洗衣服')"> 洗衣服 +10</label></div>
-<div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t3',10,'澆花')"> 澆花 +10</label></div>
-<div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t4',40,'唸法文')"> 唸法文 +40</label></div>
-<div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t5',40,'法文聽寫')"> 法文聽寫 +40</label></div>
-<div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t6',50,'打電話給家人')"> 打電話給家人 +50</label></div>
-<div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t7',100,'進貢（買禮物給家人）')"> 進貢 +100</label></div>
+<div class="task"><label><input type="checkbox" onchange="task(this,'wash',30,'洗碗')"> 洗碗 +30</label></div>
+<div class="task"><label><input type="checkbox" onchange="task(this,'laundry',10,'洗衣服')"> 洗衣服 +10</label></div>
+<div class="task"><label><input type="checkbox" onchange="task(this,'water',10,'澆花')"> 澆花 +10</label></div>
+<div class="task"><label><input type="checkbox" onchange="task(this,'frenchSpeak',40,'大聲唸法文')"> 大聲唸法文 +40</label></div>
+<div class="task"><label><input type="checkbox" onchange="task(this,'frenchWrite',40,'法文聽寫')"> 法文聽寫 +40</label></div>
+<div class="task"><label><input type="checkbox" onchange="task(this,'callFamily',50,'打電話給家人')"> 打電話給家人 +50</label></div>
+<div class="task"><label><input type="checkbox" onchange="task(this,'giftFamily',100,'買禮物給家人')"> 買禮物給家人 +100</label></div>
 
 <br>
-<button onclick="resetTasks()">重置任務勾選</button>
-</div>
-
-<!-- 🎁 兌換 -->
-<div class="card">
-<h4>兌換中心</h4>
-
-<div class="reward">休息（100） <button onclick="redeem(100)">兌換</button></div>
-<div class="reward">開心買買（100） <button onclick="redeem(100)">兌換</button></div>
+<button onclick="resetTasks()">重置任務</button>
 
 </div>
+<button onclick="resetTasks()">重置任務</button>
+</div>
 
-<!-- 📊 明細 -->
+<!-- 成就 -->
 <div class="card">
-<h4>積分明細</h4>
-<div id="log" class="log"></div>
+<h4>🏆 成就</h4>
+<div id="achievements"></div>
+</div>
+
+<!-- 兌換 -->
+<div class="card">
+<h4>兌換</h4>
+<div>休息(100) <button onclick="redeem(100)">兌換</button></div>
+</div>
+
+<!-- log -->
+<div class="card">
+<h4>紀錄</h4>
+<div id="log"></div>
 </div>
 
 <div id="toast" class="toast"></div>
@@ -154,53 +148,64 @@ button {
 <script>
 let points = parseInt(localStorage.getItem("points")||0);
 let logs = JSON.parse(localStorage.getItem("logs")||"[]");
+let count = JSON.parse(localStorage.getItem("count")||"{}");
 
-/* 等級 */
-function getLevel(p){
-  if(p>=100000) return "王犬 🐺";
-  if(p>=50000) return "獵犬 🐕";
-  if(p>=10000) return "成犬 🐕";
-  return "幼犬 🐶";
-}
-
-/* XP */
-function getXP(p){
-  if(p<10000) return (p/10000)*100;
-  if(p<50000) return ((p-10000)/40000)*100;
-  if(p<100000) return ((p-50000)/50000)*100;
-  return 100;
-}
-
-/* 提示 */
-function showToast(msg){
+function toast(msg){
   let t=document.getElementById("toast");
   t.innerText=msg;
   t.classList.add("show");
   setTimeout(()=>t.classList.remove("show"),1500);
 }
 
-/* 日期 */
 function getToday(){
   return new Date().toISOString().split("T")[0];
 }
 
-/* 📅 日曆 */
+/* 任務 */
+function task(cb,id,val,name){
+  let tasks=JSON.parse(localStorage.getItem("tasks")||"{}");
+
+  if(cb.checked && !tasks[id]){
+    points+=val;
+    tasks[id]=true;
+
+    count[id]=(count[id]||0)+1;
+    localStorage.setItem("count",JSON.stringify(count));
+
+    log(name+" +"+val);
+  }
+
+  if(!cb.checked) delete tasks[id];
+
+  localStorage.setItem("tasks",JSON.stringify(tasks));
+  update();
+}
+
+/* 成就 */
+function renderAchievements(){
+  let html="";
+  let wash=count["wash"]||0;
+
+  html+=`洗碗 7次 (${wash}/7) ${wash>=7?"🏆":""}<br>`;
+
+  document.getElementById("achievements").innerHTML=html;
+}
+
+/* 日曆 */
 function renderCalendar(){
-  let data = JSON.parse(localStorage.getItem("checkinDays")||"[]");
-  let now = new Date();
-  let y=now.getFullYear(), m=now.getMonth();
+  let data=JSON.parse(localStorage.getItem("check")||"[]");
+  let now=new Date();
+  let y=now.getFullYear(),m=now.getMonth();
   let last=new Date(y,m+1,0).getDate();
   let today=now.getDate();
 
   let html="";
   for(let i=1;i<=last;i++){
-
-    let mm = String(m+1).padStart(2,'0');
-    let dd = String(i).padStart(2,'0');
-    let d = `${y}-${mm}-${dd}`;
+    let mm=String(m+1).padStart(2,'0');
+    let dd=String(i).padStart(2,'0');
+    let d=`${y}-${mm}-${dd}`;
 
     let cls="day";
-
     if(i===today) cls+=" today";
     if(data.includes(d)) cls+=" checked";
 
@@ -212,115 +217,93 @@ function renderCalendar(){
 /* 簽到 */
 function checkin(){
   let today=getToday();
-  let data=JSON.parse(localStorage.getItem("checkinDays")||"[]");
+  let data=JSON.parse(localStorage.getItem("check")||"[]");
 
   if(data.includes(today)){
-    showToast("今天簽過了！");
+    toast("今天簽過了");
     return;
   }
 
   data.push(today);
-  localStorage.setItem("checkinDays",JSON.stringify(data));
+  localStorage.setItem("check",JSON.stringify(data));
 
-  updateStreak();
+  streak();
   renderCalendar();
-  showToast("簽到成功✨");
 }
 
-/* 🔥 連續 */
-function updateStreak(){
-  let data=JSON.parse(localStorage.getItem("checkinDays")||"[]").sort();
-  let streak=1;
+/* 連續 */
+function streak(){
+  let data=JSON.parse(localStorage.getItem("check")||"[]").sort();
+  let s=1;
 
   for(let i=data.length-1;i>0;i--){
-    let d1=new Date(data[i]), d2=new Date(data[i-1]);
-    if((d1-d2)/(1000*60*60*24)===1) streak++;
+    let d1=new Date(data[i]),d2=new Date(data[i-1]);
+    if((d1-d2)/86400000===1) s++;
     else break;
   }
 
-  document.getElementById("crown").innerText =
-    streak>=7 ? "👑 連續7天達成！" : `目前連續 ${streak} 天`;
-}
+  let c=document.getElementById("crown");
 
-/* 任務 */
-function toggleTask(cb,id,val,name){
-  let tasks=JSON.parse(localStorage.getItem("tasks")||"{}");
-
-  if(cb.checked && !tasks[id]){
-    points+=val;
-    tasks[id]=true;
-
-    let now=new Date();
-    let time = now.toLocaleDateString('zh-TW',{month:'2-digit',day:'2-digit'}) 
-             + " " +
-             now.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',hour12:false});
-
-    logs.unshift(time+"｜"+name+" +"+val);
+  if(s>=7){
+    c.innerText="👑完成！";
+    c.classList.remove("crown-animate");
+    void c.offsetWidth;
+    c.classList.add("crown-animate");
+  }else{
+    c.innerText="連續 "+s+" 天";
   }
-
-  if(!cb.checked) delete tasks[id];
-
-  localStorage.setItem("tasks",JSON.stringify(tasks));
-  update();
 }
 
-/* 任務重置 */
-function resetTasks(){
-  localStorage.setItem("tasks","{}");
-  document.querySelectorAll("input").forEach(c=>c.checked=false);
-  showToast("任務已重置");
-}
-
-/* 🎁 兌換 */
+/* 兌換 */
 function redeem(cost){
   if(points>=cost){
     points-=cost;
-
-    let now=new Date();
-    let time = now.toLocaleDateString('zh-TW',{month:'2-digit',day:'2-digit'}) 
-             + " " +
-             now.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',hour12:false});
-
-    logs.unshift(time+"｜兌換 -"+cost);
-    showToast("兌換成功🎉");
+    log("兌換 -"+cost,true);
+    toast("成功🎉");
   }else{
-    showToast("現在還不能換唷～ 🐶");
+    toast("現在還不能換唷～");
   }
   update();
 }
 
-/* 更新 */
+/* log */
+function log(text,isMinus=false){
+  let now=new Date();
+  let time=now.toLocaleDateString('zh-TW',{month:'2-digit',day:'2-digit'})+" "+
+           now.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
+
+  logs.unshift(time+"｜"+text);
+}
+
+/* reset */
+function resetTasks(){
+  localStorage.setItem("tasks","{}");
+  document.querySelectorAll("input").forEach(c=>c.checked=false);
+  toast("任務已重置");
+}
+
+/* update */
 function update(){
   document.getElementById("points").innerText=points;
-  document.getElementById("level").innerText=getLevel(points);
-  document.getElementById("xp").style.width=getXP(points)+"%";
-
   localStorage.setItem("points",points);
   localStorage.setItem("logs",JSON.stringify(logs));
 
-  document.getElementById("log").innerHTML =
+  document.getElementById("xp").style.width=(points%10000/10000*100)+"%";
+
+  document.getElementById("log").innerHTML=
   logs.map(l=>{
-    let isMinus=l.includes("兌換");
-    let cls=isMinus?"minus":"plus";
-    let parts=l.split("｜");
-
-    return `<div>
-      <span class="time">${parts[0]}</span><br>
-      <span class="${cls}">${parts[1]}</span>
-    </div>`;
+    let minus=l.includes("兌換");
+    let cls=minus?"minus":"plus";
+    let p=l.split("｜");
+    return `<div><span class="time">${p[0]}</span><br><span class="${cls}">${p[1]}</span></div>`;
   }).join("");
+
+  renderAchievements();
 }
 
-/* 重置 */
-function resetAll(){
-  if(confirm("確定重置？")){
-    localStorage.clear();
-    location.reload();
-  }
-}
-
+/* init */
 renderCalendar();
-updateStreak();
+streak();
 update();
 </script>
 
