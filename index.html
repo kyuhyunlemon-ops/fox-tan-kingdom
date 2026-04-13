@@ -11,6 +11,7 @@ body {
   text-align:center;
 }
 
+/* 卡片 */
 .card {
   background:white;
   padding:20px;
@@ -18,10 +19,12 @@ body {
   width:360px;
   border-radius:20px;
   box-shadow:0 10px 25px rgba(0,0,0,0.08);
+  position:relative;
 }
 
 .task { text-align:left; margin:8px 0; }
 
+/* 按鈕 */
 button {
   background:#6ea8fe;
   color:white;
@@ -30,6 +33,18 @@ button {
   padding:6px 12px;
 }
 
+/* 小按鈕（右上角用） */
+.small-btn {
+  position:absolute;
+  right:15px;
+  top:15px;
+  font-size:11px;
+  padding:4px 8px;
+  background:#ccc;
+  color:#333;
+}
+
+/* XP */
 .xp-bar {
   height:10px;
   background:#eee;
@@ -52,7 +67,6 @@ button {
   border-radius:8px;
   background:#eee;
 }
-
 .checked {
   background: linear-gradient(135deg,#f5c542,#ffd86b);
   color:#5a4500;
@@ -61,13 +75,20 @@ button {
   border:2px solid #f5c542;
 }
 
+/* 兌換 */
+.reward {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin:12px 0;
+}
+
 /* log */
 .log {
   font-size:12px;
   text-align:left;
   max-height:180px;
   overflow-y:auto;
-  padding:5px;
 }
 .log div {
   padding:6px 4px;
@@ -77,13 +98,13 @@ button {
 .minus { color:#c62828; }
 .time { color:#888;font-size:11px; }
 
-/* crown */
+/* 皇冠 */
 @keyframes glow {
   50%{transform:scale(1.3);text-shadow:0 0 20px gold;}
 }
 .crown-animate { animation:glow 0.8s; }
 
-/* toast */
+/* 提示 */
 .toast {
   position:fixed;
   bottom:30px;
@@ -146,14 +167,23 @@ button {
 <!-- 兌換 -->
 <div class="card">
 <h4>兌換</h4>
-<div>休息（100） <button onclick="redeem(100)">兌換</button></div>
-  
-<div>開心買買（100） <button onclick="redeem(100)">兌換</button></div>
+
+<div class="reward">
+  <span>休息（100）</span>
+  <button onclick="redeem(100)">兌換</button>
+</div>
+
+<div class="reward">
+  <span>開心買買（100）</span>
+  <button onclick="redeem(100)">兌換</button>
+</div>
+
 </div>
 
 <!-- 明細 -->
 <div class="card">
 <h4>積分明細</h4>
+<button class="small-btn" onclick="resetLogs()">清空</button>
 <div id="log" class="log"></div>
 </div>
 
@@ -201,7 +231,7 @@ function renderAchievements(){
   let show=Math.min(wash,7);
 
   document.getElementById("achievements").innerHTML=
-  `洗碗 7次 (${show}/7) ${wash>=7?"🏆":""}`;
+    `洗碗 7次 (${show}/7) ${wash>=7?"🏆":""}`;
 }
 
 /* 日曆 */
@@ -271,7 +301,7 @@ function streak(){
 function redeem(cost){
   if(points>=cost){
     points-=cost;
-    addLog("兌換 -"+cost,true);
+    addLog("兌換 -"+cost);
     toast("成功🎉");
   }else{
     toast("現在還不能換唷～");
@@ -286,6 +316,15 @@ function addLog(text){
            now.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
 
   logs.unshift(time+"｜"+text);
+}
+
+/* 清空明細 */
+function resetLogs(){
+  if(confirm("清空明細？")){
+    logs=[];
+    localStorage.setItem("logs",JSON.stringify(logs));
+    update();
+  }
 }
 
 /* reset */
