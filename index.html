@@ -52,6 +52,11 @@
       transform: scale(1.2);
       margin-right: 8px;
     }
+
+    .level {
+      font-weight: bold;
+      margin-top: 10px;
+    }
   </style>
 </head>
 
@@ -62,6 +67,7 @@
 
 <div class="card">
   <h3>目前金幣：<span id="points">0</span></h3>
+  <div class="level">等級：<span id="level">幼犬</span></div>
 </div>
 
 <!-- 任務 -->
@@ -117,6 +123,12 @@
     ? parseInt(localStorage.getItem("points"))
     : 0;
 
+  function getLevel(p) {
+    if (p >= 200) return "王犬 🐺";
+    if (p >= 100) return "獵犬 🐕";
+    return "幼犬 🐶";
+  }
+
   function toggleTask(checkbox, id, value) {
     let completed = JSON.parse(localStorage.getItem("tasks") || "{}");
 
@@ -144,6 +156,7 @@
 
   function update() {
     document.getElementById("points").innerText = points;
+    document.getElementById("level").innerText = getLevel(points);
     localStorage.setItem("points", points);
   }
 
