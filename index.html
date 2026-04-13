@@ -45,6 +45,24 @@ button {
 }
 
 .log { font-size:12px; text-align:left; max-height:120px; overflow:auto; }
+
+/* 簽到 */
+.checkin {
+  display:flex;
+  justify-content:space-between;
+  margin-top:10px;
+}
+.day {
+  width:35px;
+  height:35px;
+  line-height:35px;
+  border-radius:50%;
+  background:#eee;
+}
+.done {
+  background:#6ea8fe;
+  color:white;
+}
 </style>
 </head>
 
@@ -64,6 +82,15 @@ button {
   <button class="danger" onclick="resetAll()">重置</button>
 </div>
 
+<!-- ✨ 簽到 -->
+<div class="card">
+<h4>每日簽到</h4>
+
+<div class="checkin" id="checkin"></div>
+
+<div id="crown" style="margin-top:10px;font-size:18px;"></div>
+</div>
+
 <!-- 任務 -->
 <div class="card">
 <h4>任務</h4>
@@ -71,21 +98,17 @@ button {
 <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t1',10,'洗碗')"> 洗碗 +10</label></div>
 <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t2',10,'洗衣服')"> 洗衣服 +10</label></div>
 <div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t3',10,'澆花')"> 澆花 +10</label></div>
-<div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t4',20,'唸法文')"> 大聲唸法文 +20</label></div>
-<div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t5',20,'法文聽寫')"> 法文聽寫 +20</label></div>
-<div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t6',50,'打電話給家人')"> 打電話給家人 +50</label></div>
-<div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t7',100,'買禮物')"> 買禮物給家人 +100</label></div>
+<div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t4',20,'唸法文')"> 唸法文 +20</label></div>
+<div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t5',20,'聽寫')"> 法文聽寫 +20</label></div>
+<div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t6',50,'打電話')"> 打電話 +50</label></div>
+<div class="task"><label><input type="checkbox" onchange="toggleTask(this,'t7',100,'買禮物')"> 買禮物 +100</label></div>
 
 </div>
 
 <!-- 兌換 -->
 <div class="card">
-<h4>兌換中心</h4>
-
-<div class="reward">休息一天（100） <button onclick="redeem(100)">兌換</button></div>
-<div class="reward">買東西（200） <button onclick="redeem(200)">兌換</button></div>
-<div class="reward">現金50元（500） <button onclick="redeem(500)">兌換</button></div>
-
+<h4>兌換</h4>
+<div class="reward">休息（100） <button onclick="redeem(100)">兌換</button></div>
 </div>
 
 <!-- 明細 -->
@@ -98,7 +121,7 @@ button {
 let points = parseInt(localStorage.getItem("points")||0);
 let logs = JSON.parse(localStorage.getItem("logs")||"[]");
 
-// ✨ 新等級
+// 等級
 function getLevel(p){
   if (p >= 100000) return "王犬 🐺";
   if (p >= 50000) return "獵犬 🐕";
@@ -106,7 +129,7 @@ function getLevel(p){
   return "幼犬 🐶";
 }
 
-// ✨ XP條（每個階段10000）
+// XP
 function getXP(p){
   if(p < 10000) return (p / 10000) * 100;
   if(p < 50000) return ((p - 10000) / 40000) * 100;
@@ -114,6 +137,42 @@ function getXP(p){
   return 100;
 }
 
+// ===== 簽到 =====
+function getToday(){
+  return new Date().toISOString().split("T")[0];
+}
+
+function handleCheckin(){
+  let data = JSON.parse(localStorage.getItem("checkin")||"[]");
+  let today = getToday();
+
+  if(!data.includes(today)){
+    data.push(today);
+  }
+
+  // 只保留7天
+  data = data.slice(-7);
+  localStorage.setItem("checkin",JSON.stringify(data));
+
+  renderCheckin(data);
+}
+
+function renderCheckin(data){
+  let html="";
+  for(let i=0;i<7;i++){
+    let done = data[i] ? "done" : "";
+    html += `<div class="day ${done}">${i+1}</div>`;
+  }
+  document.getElementById("checkin").innerHTML = html;
+
+  if(data.length === 7){
+    document.getElementById("crown").innerText="👑 連續7天達成！";
+  } else {
+    document.getElementById("crown").innerText="";
+  }
+}
+
+// 任務
 function toggleTask(cb,id,val,name){
   let tasks = JSON.parse(localStorage.getItem("tasks")||"{}");
 
@@ -134,14 +193,11 @@ function toggleTask(cb,id,val,name){
   update();
 }
 
+// 兌換
 function redeem(cost){
   if(points>=cost){
     points-=cost;
-
-    let time=new Date().toLocaleTimeString();
-    logs.unshift(time+"｜兌換 -"+cost);
-  }else{
-    alert("不夠！");
+    logs.unshift("兌換 -"+cost);
   }
   update();
 }
@@ -164,6 +220,7 @@ function resetAll(){
   }
 }
 
+handleCheckin();
 update();
 </script>
 
