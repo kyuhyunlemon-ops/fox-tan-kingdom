@@ -12,9 +12,7 @@
       margin: 0;
     }
 
-    h2 {
-      margin-top: 30px;
-    }
+    h2 { margin-top: 30px; }
 
     .subtitle {
       color: gray;
@@ -57,6 +55,22 @@
       font-weight: bold;
       margin-top: 10px;
     }
+
+    .xp-bar {
+      width: 100%;
+      height: 10px;
+      background: #eee;
+      border-radius: 10px;
+      margin-top: 10px;
+      overflow: hidden;
+    }
+
+    .xp-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #6ea8fe, #a5c8ff);
+      transition: width 0.3s;
+    }
   </style>
 </head>
 
@@ -68,6 +82,10 @@
 <div class="card">
   <h3>目前金幣：<span id="points">0</span></h3>
   <div class="level">等級：<span id="level">幼犬</span></div>
+
+  <div class="xp-bar">
+    <div class="xp-fill" id="xp"></div>
+  </div>
 </div>
 
 <!-- 任務 -->
@@ -119,24 +137,50 @@
 </div>
 
 <script>
+  // ===== 點數 =====
   let points = localStorage.getItem("points")
     ? parseInt(localStorage.getItem("points"))
     : 0;
 
+  // ===== 等級 =====
   function getLevel(p) {
     if (p >= 200) return "王犬 🐺";
     if (p >= 100) return "獵犬 🐕";
     return "幼犬 🐶";
   }
 
+  function getXPPercent(p) {
+    if (p < 100) return (p / 100) * 100;
+    if (p < 200) return ((p - 100) / 100) * 100;
+    return 100;
+  }
+
+  // ===== 每日重置核心 =====
+  function getToday() {
+    return new Date().toISOString().split("T")[0];
+  }
+
+  function checkReset() {
+    let lastDate = localStorage.getItem("lastDate");
+    let today = getToday();
+
+    if (lastDate !== today) {
+      // 新的一天 → 清空任務
+      localStorage.setItem("tasks", JSON.stringify({}));
+      localStorage.setItem("lastDate", today);
+    }
+  }
+
+  // ===== 任務 =====
   function toggleTask(checkbox, id, value) {
     let completed = JSON.parse(localStorage.getItem("tasks") || "{}");
 
     if (checkbox.checked) {
-      points += value;
-      completed[id] = true;
+      if (!completed[id]) {
+        points += value;
+        completed[id] = true;
+      }
     } else {
-      points -= value;
       delete completed[id];
     }
 
@@ -144,6 +188,7 @@
     update();
   }
 
+  // ===== 兌換 =====
   function redeem(cost) {
     if (points >= cost) {
       points -= cost;
@@ -154,12 +199,18 @@
     update();
   }
 
+  // ===== 更新畫面 =====
   function update() {
     document.getElementById("points").innerText = points;
     document.getElementById("level").innerText = getLevel(points);
+
+    let percent = getXPPercent(points);
+    document.getElementById("xp").style.width = percent + "%";
+
     localStorage.setItem("points", points);
   }
 
+  // ===== 載入任務 =====
   function loadTasks() {
     let completed = JSON.parse(localStorage.getItem("tasks") || "{}");
 
@@ -171,6 +222,8 @@
     });
   }
 
+  // ===== 初始化 =====
+  checkReset();   // ← 每次開網頁都會檢查是否新的一天
   update();
   loadTasks();
 </script>
